@@ -1,0 +1,6 @@
+add_executable(merge_access merge_access.cu)
+target_link_libraries(merge_access PRIVATE CUDA::cudart ${CUDA_cublas_LIBRARY})
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(merge_access PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-GENERATED>)
+endif()
+target_compile_options(merge_access PRIVATE -lineinfo)
