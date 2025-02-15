@@ -1,0 +1,3 @@
+/home/frank/ncu/reduce/build/CMakeFiles/rebuild_cache.dir
+/home/frank/ncu/reduce/build/CMakeFiles/reduce.dir
+/home/frank/ncu/reduce/build/CMakeFiles/edit_cache.dir

@@ -1,0 +1,55 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_b9b10/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b9b10.dir/build.make CMakeFiles/cmTC_b9b10.dir/build
+make[1]: Entering directory '/home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b9b10.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -std=gnu++14 -o CMakeFiles/cmTC_b9b10.dir/CheckSymbolExists.cxx.o -c /home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_b9b10
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b9b10.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_b9b10.dir/CheckSymbolExists.cxx.o  -o cmTC_b9b10 
+CMakeFiles/cmTC_b9b10.dir/CheckSymbolExists.cxx.o: In function `main':
+CheckSymbolExists.cxx:(.text+0x1b): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_b9b10.dir/build.make:97: recipe for target 'cmTC_b9b10' failed
+make[1]: *** [cmTC_b9b10] Error 1
+make[1]: Leaving directory '/home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_b9b10/fast' failed
+make: *** [cmTC_b9b10/fast] Error 2
+
+File /home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_36ef5/fast"
+/usr/bin/make -f CMakeFiles/cmTC_36ef5.dir/build.make CMakeFiles/cmTC_36ef5.dir/build
+make[1]: Entering directory '/home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_36ef5.dir/CheckFunctionExists.cxx.o
+/usr/bin/c++    -DCHECK_FUNCTION_EXISTS=pthread_create   -std=gnu++14 -o CMakeFiles/cmTC_36ef5.dir/CheckFunctionExists.cxx.o -c /home/frank/ncu/reduce/build/CMakeFiles/CheckLibraryExists/CheckFunctionExists.cxx
+Linking CXX executable cmTC_36ef5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_36ef5.dir/link.txt --verbose=1
+/usr/bin/c++   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_36ef5.dir/CheckFunctionExists.cxx.o  -o cmTC_36ef5 -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_36ef5.dir/build.make:97: recipe for target 'cmTC_36ef5' failed
+make[1]: *** [cmTC_36ef5] Error 1
+make[1]: Leaving directory '/home/frank/ncu/reduce/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_36ef5/fast' failed
+make: *** [cmTC_36ef5/fast] Error 2
+
+
