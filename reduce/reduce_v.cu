@@ -2,6 +2,12 @@
 #include <stdio.h>
 
 #define THREAD_PER_BLOCK 256
+#define WARP_SIZE 32
+
+const int N=32*1024*1024;
+const int block_num = 1024;
+const int NUM_PER_BLOCK = N / block_num;
+const int NUM_PER_THREAD = NUM_PER_BLOCK/THREAD_PER_BLOCK;
 
 /*
     naive achivement
@@ -143,3 +149,139 @@ __global__ void reduce4(float *d_in,float *d_out){
 /*
     将for循环完全展开，但现代编译器可能已对此进行优化，提升有限
 */
+
+
+/*
+    v5 完全展开for循环
+*/
+template <unsigned int blockSize>
+__device__ void warpReduce_v2(volatile float *cache, unsigned int tid){
+    if(blockSize >= 64) cache[tid] += cache[tid + 32];
+    if(blockSize >= 32) cache[tid] += cache[tid + 16];
+    if(blockSize >= 16) cache[tid] += cache[tid + 8];
+    if(blockSize >= 8) cache[tid] += cache[tid + 4];
+    if(blockSize >= 4) cache[tid] += cache[tid + 2];
+    if(blockSize >= 2) cache[tid] += cache[tid + 1];
+}
+
+template <unsigned int blockSize>
+__global__ void reduce5(float *d_in, float *d_out){
+    __shared__ float sdata[THREAD_PER_BLOCK];
+
+    unsigned int tid = threadIdx.x;
+    unsigned int i = blockIdx.x * (blockDim.x * 2) + threadIdx.x;
+    sdata[tid] = d_in[i] + d_in[i + blockDim.x];
+    __syncthreads();
+
+    if (blockSize >= 512){
+        if (tid < 256){
+            sdata[tid] += sdata[tid + 256];
+        }
+        __syncthreads();
+    }
+    if (blockSize >= 256){
+        if (tid < 128){
+            sdata[tid] += sdata[tid + 128];
+        }
+        __syncthreads();
+    }
+    if (blockSize >= 128){
+        if (tid < 64){
+            sdata[tid] += sdata[tid + 64];
+        }
+        __syncthreads();
+    }
+
+    if (tid < 32) warpReduce_v2<blockSize>(sdata, tid);
+
+    if (tid == 0) d_out[blockIdx.x] = sdata[0];
+}
+
+/*
+    v6通过block设置的调整，调整每个block处理的数据量，获取最优取值
+*/
+template <unsigned int blockSize, int NUM_PER_THREAD>
+__global__ void reduce6(float *d_in, float *d_out, unsigned int n){
+    __shared__ float sdata[blockSize];
+
+    unsigned int tid = threadIdx.x;
+    unsigned int i = blockIdx.x * (blockSize * NUM_PER_THREAD) + threadIdx.x;
+
+    sdata[tid] = 0;
+
+    #pragma unroll
+    for(int iter = 0; iter < NUM_PER_THREAD; iter++){
+        sdata[tid] += d_in[i + iter * blockSize];
+    }
+
+    __syncthreads();
+
+    if (blockSize >= 512){
+        if(tid < 256){
+            sdata[tid] += sdata[tid + 256];
+        }
+        __syncthreads();
+    }
+    if (blockSize >= 256){
+        if (tid < 128){
+            sdata[tid] += sdata[tid + 128];
+        }
+        __syncthreads();
+    }
+    if (blockSize >= 128){
+        if (tid < 64){
+            sdata[tid] += sdata[tid + 64];
+        }
+        __syncthreads();
+    }
+    if (tid < 32) warpReduce_v2<blockSize>(sdata, tid);
+
+    if (tid == 0) d_out[blockIdx.x] = sdata[0];
+}
+
+
+/*
+    v7 利用shuffle指令
+*/
+template <unsigned int blockSize>
+__device__ __forceinline__ float warpReduceSum(float sum){
+    if (blockSize >= 32) sum += __shfl_down_sync(0xffffffff, sum, 16);
+    if (blockSize >= 16) sum += __shfl_down_sync(0xffffffff, sum, 8);
+    if (blockSize >= 8) sum += __shfl_down_sync(0xffffffff, sum, 4);
+    if (blockSize >= 4) sum += __shfl_down_sync(0xffffffff, sum, 2);
+    if (blockSize >= 2) sum += __shfl_down_sync(0xffffffff, sum, 1);
+    return sum;
+}
+
+template <unsigned int blockSize, int NUM_PER_THREAD>
+__global__ void reduce7(float *d_in, float *d_out){
+    float sum = 0;
+
+    unsigned int tid = threadIdx.x;
+    unsigned int i = blockIdx.x * (blockSize * NUM_PER_THREAD) + threadIdx.x;
+
+    #pragma unroll
+    for(int iter=0; iter<NUM_PER_THREAD; iter++){
+        sum += d_in[i+iter*blockSize];
+    }
+
+    static __shared__ float warpLevelSums[blockSize / WARP_SIZE];
+    const int laneId = threadIdx.x % WARP_SIZE;
+    const int warpId = threadIdx.x / WARP_SIZE;
+
+    sum = warpReduceSum<blockSize>(sum);
+
+    if (laneId == 0) warpLevelSums[warpId] = sum;
+    __syncthreads();
+
+    sum = (threadIdx.x < blockDim.x / WARP_SIZE) ? warpLevelSums[laneId] : 0;
+
+    if (warpId == 0) sum = warpReduceSum<blockSize / WARP_SIZE>(sum);
+
+    if (tid == 0) d_out[blockIdx.x] = sum;
+}
+
+
+template __global__ void reduce5<THREAD_PER_BLOCK>(float *d_in, float *d_out);
+template __global__ void reduce6<THREAD_PER_BLOCK, NUM_PER_THREAD>(float *d_in, float *d_out, unsigned int n);
+template __global__ void reduce7<THREAD_PER_BLOCK, NUM_PER_THREAD>(float *d_in, float *d_out);
