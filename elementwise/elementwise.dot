@@ -1,0 +1,17 @@
+digraph f {
+subgraph "cluster__Z8vec4_addPfS_S_" {
+node [fontname="Courier",fontsize=10,shape=Mrecord];
+"_Z8vec4_addPfS_S_"
+[label="{<entry>        .global         _Z8vec4_addPfS_S_\l     .type           _Z8vec4_addPfS_S_,@function\l  .size            _Z8vec4_addPfS_S_,(.L_x_3\ -\ _Z8vec4_addPfS_S_)\l      .other          _Z8vec4_addPfS_S_,\<no\ object\>\l_Z8vec4_addPfS_S_:\l.text._Z8vec4_addPfS_S_:\l\ \ MOV\ R1,\ c\[0x0\]\[0x28\]\ ;\l\ \ S2R\ R0,\ SR_TID.X\ ;\l\ \ MOV\ R13,\ 0x4\ ;\l\ \ ULDC.64\ UR4,\ c\[0x0\]\[0x118\]\ ;\l\ \ S2R\ R3,\ SR_CTAID.X\ ;\l\ \ IMAD\ R0,\ R3,\ c\[0x0\]\[0x0\],\ R0\ ;\l\ \ SHF.L.U32\ R0,\ R0,\ 0x2,\ RZ\ ;\l\ \ IMAD.WIDE\ R4,\ R0,\ R13,\ c\[0x0\]\[0x168\]\ ;\l\ \ IMAD.WIDE\ R2,\ R0,\ R13.reuse,\ c\[0x0\]\[0x160\]\ ;\l\ \ LDG.E.128\ R4,\ \[R4.64\]\ ;\l\ \ LDG.E.128\ R8,\ \[R2.64\]\ ;\l\ \ FADD\ R11,\ R11,\ R7\ ;\l\ \ FADD\ R10,\ R10,\ R6\ ;\l\ \ FADD\ R9,\ R9,\ R5\ ;\l\ \ FADD\ R8,\ R8,\ R4\ ;\l\ \ IMAD.WIDE\ R6,\ R0,\ R13,\ c\[0x0\]\[0x170\]\ ;\l\ \ STG.E.128\ \[R6.64\],\ R8\ ;\l|<exit0>\ \ EXIT\ ;\l}"]
+}
+subgraph "cluster__Z8vec2_addPfS_S_" {
+node [fontname="Courier",fontsize=10,shape=Mrecord];
+"_Z8vec2_addPfS_S_"
+[label="{<entry>        .global         _Z8vec2_addPfS_S_\l     .type           _Z8vec2_addPfS_S_,@function\l  .size            _Z8vec2_addPfS_S_,(.L_x_4\ -\ _Z8vec2_addPfS_S_)\l      .other          _Z8vec2_addPfS_S_,\<no\ object\>\l_Z8vec2_addPfS_S_:\l.text._Z8vec2_addPfS_S_:\l\ \ MOV\ R1,\ c\[0x0\]\[0x28\]\ ;\l\ \ S2R\ R0,\ SR_TID.X\ ;\l\ \ MOV\ R7,\ 0x4\ ;\l\ \ ULDC.64\ UR4,\ c\[0x0\]\[0x118\]\ ;\l\ \ S2R\ R3,\ SR_CTAID.X\ ;\l\ \ IMAD\ R0,\ R3,\ c\[0x0\]\[0x0\],\ R0\ ;\l\ \ SHF.L.U32\ R0,\ R0,\ 0x1,\ RZ\ ;\l\ \ IMAD.WIDE\ R2,\ R0,\ R7,\ c\[0x0\]\[0x160\]\ ;\l\ \ IMAD.WIDE\ R4,\ R0.reuse,\ R7.reuse,\ c\[0x0\]\[0x168\]\ ;\l\ \ LDG.E.64\ R2,\ \[R2.64\]\ ;\l\ \ LDG.E.64\ R4,\ \[R4.64\]\ ;\l\ \ IMAD.WIDE\ R6,\ R0,\ R7,\ c\[0x0\]\[0x170\]\ ;\l\ \ FADD\ R9,\ R3,\ R5\ ;\l\ \ FADD\ R8,\ R2,\ R4\ ;\l\ \ STG.E.64\ \[R6.64\],\ R8\ ;\l|<exit0>\ \ EXIT\ ;\l}"]
+}
+subgraph "cluster__Z3addPfS_S_" {
+node [fontname="Courier",fontsize=10,shape=Mrecord];
+"_Z3addPfS_S_"
+[label="{<entry>        .global         _Z3addPfS_S_\l  .type           _Z3addPfS_S_,@function\l        .size  _Z3addPfS_S_,(.L_x_5\ -\ _Z3addPfS_S_)\l .other          _Z3addPfS_S_,\<no\ object\>\l_Z3addPfS_S_:\l.text._Z3addPfS_S_:\l\ \ MOV\ R1,\ c\[0x0\]\[0x28\]\ ;\l\ \ S2R\ R6,\ SR_TID.X\ ;\l\ \ MOV\ R7,\ 0x4\ ;\l\ \ ULDC.64\ UR4,\ c\[0x0\]\[0x118\]\ ;\l\ \ S2R\ R3,\ SR_CTAID.X\ ;\l\ \ IMAD\ R6,\ R3,\ c\[0x0\]\[0x0\],\ R6\ ;\l\ \ IMAD.WIDE\ R2,\ R6,\ R7,\ c\[0x0\]\[0x160\]\ ;\l\ \ IMAD.WIDE\ R4,\ R6.reuse,\ R7.reuse,\ c\[0x0\]\[0x168\]\ ;\l\ \ LDG.E\ R2,\ \[R2.64\]\ ;\l\ \ LDG.E\ R5,\ \[R4.64\]\ ;\l\ \ IMAD.WIDE\ R6,\ R6,\ R7,\ c\[0x0\]\[0x170\]\ ;\l\ \ FADD\ R9,\ R2,\ R5\ ;\l\ \ STG.E\ \[R6.64\],\ R9\ ;\l|<exit0>\ \ EXIT\ ;\l}"]
+}
+}
