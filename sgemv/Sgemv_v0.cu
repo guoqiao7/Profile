@@ -14,8 +14,8 @@
         printf("    Line:       %d\n", __LINE__);     \
         printf("    Error code: %d\n", e);   \
         printf("    Error text: %s\n", cudaGetErrorString(e));  \
-        exit(1); \  
-    }\    
+        exit(1);   \
+    }\
 }
 
 template <unsigned int WarpSize>
@@ -61,7 +61,7 @@ __global__ void Sgem_v0(float *__restrict__ A, float *__restrict__ x, float *__r
             int current_col = i * warp_size + laneId;
             res += A[current_row * N + current_col] * x[current_col];
         }
-        res = warpReduceSum<warpSize>(res);
+        res = warpReduceSum<warp_size>(res);
         if (laneId == 0) y[current_row] = res;
     }
 }
