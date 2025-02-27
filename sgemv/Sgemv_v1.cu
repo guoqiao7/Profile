@@ -41,8 +41,8 @@ void initiaMatrix(float *matrix, int size){
     }
 }
 
-// N == 32
-__global__ void Sgem_v0(float *__restrict__ A, float *__restrict__ x, float *__restrict__ y,const int M, const int N){
+// N >= 128
+__global__ void Sgem_v1(float *__restrict__ A, float *__restrict__ x, float *__restrict__ y,const int M, const int N){
     int bx = blockIdx.x;
 
     int tx = threadIdx.x;
@@ -54,14 +54,18 @@ __global__ void Sgem_v0(float *__restrict__ A, float *__restrict__ x, float *__r
 
     if(current_row < M){
         float res = 0;
-        int iter = (N + warp_size - 1) / warp_size;
+        int iter = ((N + warp_size - 1) / warp_size) / 4;
         if(iter == 0) iter = 1;
+        A = &A[current_row * N];
         #pragma unroll
         for(int i = 0; i < iter; i++){
             int current_col = i * warp_size + laneId;
-            if(current_col < N){
-                res += A[current_row * N + current_col] * x[current_col];
-            }
+            float4 current_val = reinterpret_cast<float4 *>(A)[current_col];
+            float4 current_x = reinterpret_cast<float4 *>(x)[current_col];
+            res += current_val.x * current_x.x;
+            res += current_val.y * current_x.y;
+            res += current_val.z * current_x.z;
+            res += current_val.w * current_x.w;
         }
         res = warpReduceSum<warp_size>(res);
         if (laneId == 0) y[current_row] = res;
@@ -106,7 +110,7 @@ int main(int argc, char** argv){
     dim3 block(32, 4);
     dim3 grid((M + block.y -1) / block.y);
     for (int i = 0; i < loop; i++){
-        Sgem_v0<<<grid, block>>>(d_A, d_x, d_y, M, N);
+        Sgem_v1<<<grid, block>>>(d_A, d_x, d_y, M, N);
     }
     
     CHECK(cudaMemcpy(h_y, d_y, bytes_y, cudaMemcpyDeviceToHost));

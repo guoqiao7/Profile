@@ -41,8 +41,9 @@ void initiaMatrix(float *matrix, int size){
     }
 }
 
-// N == 32
-__global__ void Sgem_v0(float *__restrict__ A, float *__restrict__ x, float *__restrict__ y,const int M, const int N){
+// N <= 16
+template<const int ROW_PER_WARP>
+__global__ void Sgem_v2(float *__restrict__ A, float *__restrict__ x, float *__restrict__ y,const int M, const int N){
     int bx = blockIdx.x;
 
     int tx = threadIdx.x;
@@ -50,21 +51,17 @@ __global__ void Sgem_v0(float *__restrict__ A, float *__restrict__ x, float *__r
 
     const int warp_size = 32;
     int laneId = tx % warp_size;
-    int current_row = blockDim.y * bx + ty;
+    int current_warp_row = (blockDim.y * bx + ty) * ROW_PER_WARP;
+    const int kWarp_size = warp_size / ROW_PER_WARP;
+    int kLaneId = laneId % kWarp_size;
+    int current_row = current_warp_row + laneId / kWarp_size;
 
     if(current_row < M){
         float res = 0;
-        int iter = (N + warp_size - 1) / warp_size;
-        if(iter == 0) iter = 1;
-        #pragma unroll
-        for(int i = 0; i < iter; i++){
-            int current_col = i * warp_size + laneId;
-            if(current_col < N){
-                res += A[current_row * N + current_col] * x[current_col];
-            }
-        }
-        res = warpReduceSum<warp_size>(res);
-        if (laneId == 0) y[current_row] = res;
+        int current_col = kLaneId;
+        res += A[current_row * N + current_col] * x[current_col];
+        res = warpReduceSum<kWarp_size>(res);
+        if (kLaneId == 0) y[current_row] = res;
     }
 }
 
@@ -91,6 +88,12 @@ int main(int argc, char** argv){
     CHECK(cudaMalloc(&d_A, bytes_A));
     CHECK(cudaMalloc(&d_x, bytes_x));
     CHECK(cudaMalloc(&d_y, bytes_y));
+
+    const int WARP_SIZE = 32;
+    const int ROW_PER_WARP = 2;
+    const int THREAD_PER_BLOCK = 128;
+    const int WARP_PER_BLOCK = THREAD_PER_BLOCK / WARP_SIZE;
+    const int ROW_PER_BLOCK = WARP_PER_BLOCK * ROW_PER_WARP;
     
     initiaMatrix(h_A, M * N);
     initiaMatrix(h_x, N);
@@ -103,10 +106,10 @@ int main(int argc, char** argv){
     CHECK(cudaMemcpy(d_x, h_x, bytes_x, cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d_y, h_y, bytes_y, cudaMemcpyHostToDevice));
 
-    dim3 block(32, 4);
-    dim3 grid((M + block.y -1) / block.y);
+    dim3 block(32, THREAD_PER_BLOCK / WARP_SIZE);
+    dim3 grid((M + ROW_PER_BLOCK - 1) / ROW_PER_BLOCK);
     for (int i = 0; i < loop; i++){
-        Sgem_v0<<<grid, block>>>(d_A, d_x, d_y, M, N);
+        Sgem_v2<ROW_PER_WARP><<<grid, block>>>(d_A, d_x, d_y, M, N);
     }
     
     CHECK(cudaMemcpy(h_y, d_y, bytes_y, cudaMemcpyDeviceToHost));
