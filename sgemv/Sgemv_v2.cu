@@ -101,7 +101,7 @@ int main(int argc, char** argv){
     memset(h_y, 0, bytes_y);
     memset(h_y1, 0, bytes_y);
 
-    int loop = 1000;
+    int loop = 3;
     CHECK(cudaMemcpy(d_A, h_A, bytes_A, cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d_x, h_x, bytes_x, cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d_y, h_y, bytes_y, cudaMemcpyHostToDevice));
